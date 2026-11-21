@@ -1,1 +1,3 @@
-print("testing testing raaaaaah")
+print("Welcome to VVM.")
+
+exec(open('app.py').read())
