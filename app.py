@@ -24,6 +24,8 @@ frame = tk.Frame(root)
 frame3 = tk.Frame(root)
 
 frame2.pack(side="bottom", fill="x")
+frame2.config(height=90)
+frame2.pack_propagate(False)
 
 frame.pack(side="left", fill="both", expand=True)
 
@@ -451,7 +453,13 @@ launch_button = tk.Button(
     command=launch
     )
 
-launch_button.pack(side="left", expand=True, pady=10)
+launch_button.pack(
+    side="left",
+    expand=True,
+    fill="both",
+    padx=5,
+    pady=5
+)
 
 backup_button = tk.Button(
     frame2,
@@ -459,7 +467,13 @@ backup_button = tk.Button(
     command=backup_active_save
 )
 
-backup_button.pack(side="left", expand=True, pady=10)
+backup_button.pack(
+    side="left",
+    expand=True,
+    fill="both",
+    padx=5,
+    pady=5
+)
 
 add_version_button = tk.Button(
     frame2,
@@ -467,7 +481,13 @@ add_version_button = tk.Button(
     command=add_version
 )
 
-add_version_button.pack(side="left", expand=True, pady=10)
+add_version_button.pack(
+    side="left",
+    expand=True,
+    fill="both",
+    padx=5,
+    pady=5
+)
 
 label = tk.Label(frame, text=f"Versions Installed: {versioncount}")
 label.pack(fill="x")
