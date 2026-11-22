@@ -26,9 +26,9 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
 
 VVM uses the following external Python packages:
 
-Pillow – Image processing and icon display.
+Pillow (https://pypi.org/project/pillow/) – Image processing and icon display.
 
-icoextract – Extracting icons from Windows executables.
+icoextract (https://pypi.org/project/icoextract/) – Extracting icons from Windows executables.
 
 ## Getting started
 
