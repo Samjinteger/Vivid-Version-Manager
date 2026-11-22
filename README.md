@@ -4,6 +4,8 @@ A small version manager for **vivid/stasis** (a rhythm game with a visual novel 
 
 VVM lets you manage multiple installations of vivid/stasis, launch different game versions, and keep their save data separate.
 
+Download the game here (it's free!): https://store.steampowered.com/app/2093940/vividstasis/ 
+
 ## Features
 
 - **Version management** – Register and manage multiple vivid/stasis installations.
