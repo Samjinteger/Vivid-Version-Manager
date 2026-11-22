@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
 import subprocess
 import os
 import json
@@ -66,6 +66,124 @@ def selection():
     version = verlist.item(selected_item, "values")[0]
 
     print(f"Selected; {title} ({version})")
+
+def add_version():
+    add_window = tk.Toplevel(root)
+    add_window.title("Add Version")
+    add_window.geometry("400x300")
+    add_window.resizable(False, False)
+    title_label = tk.Label(add_window, text="Version Title:")
+    title_label.pack()
+
+    title_entry = tk.Entry(add_window)
+    title_entry.pack()
+
+    version_label = tk.Label(add_window, text="Version Number:")
+    version_label.pack()
+
+    version_entry = tk.Entry(add_window)
+    version_entry.pack()
+
+    id_label = tk.Label(add_window, text="Version ID:")
+    id_label.pack()
+
+    id_entry = tk.Entry(add_window)
+    id_entry.pack()
+
+    executable_label = tk.Label(add_window, text="Executable:")
+    executable_label.pack()
+
+    executable_entry = tk.Entry(add_window, width=40)
+    executable_entry.pack()
+
+    def browse_executable():
+        path = filedialog.askopenfilename(
+            title="Select VIVIDSTASIS.exe",
+            filetypes=[("Executable", "*.exe")]
+        )
+
+        if path:
+            executable_entry.delete(0, tk.END)
+            executable_entry.insert(0, path)
+
+
+    browse_button = tk.Button(
+        add_window,
+        text="Browse...",
+        command=browse_executable
+    )
+    browse_button.pack()
+
+    def save_version():
+        title = title_entry.get().strip()
+        version = version_entry.get().strip()
+        version_id = id_entry.get().strip()
+        executable = executable_entry.get().strip()
+
+        if not title or not version or not version_id or not executable:
+            messagebox.showerror(
+            "Invalid Version",
+            "Please fill in all fields."
+            )
+            return
+
+        for existing_version in data["versions"]:
+            if existing_version["id"] == version_id:
+                messagebox.showerror(
+                    "Duplicate Version ID",
+                    "This version ID is already in use."
+                )
+                return
+
+        for existing_version in data["versions"]:
+            if os.path.normcase(os.path.abspath(existing_version["executable"])) == os.path.normcase(os.path.abspath(executable)):
+                messagebox.showerror(
+                    "Duplicate Installation",
+                    "This executable is already registered."
+                )
+                return
+
+        if not os.path.isfile(executable):
+            messagebox.showerror(
+                "Invalid Executable",
+                "The selected executable does not exist."
+                )
+            return
+
+        if os.path.basename(executable).lower() != "vividstasis.exe":
+            messagebox.showerror(
+                "Invalid Executable",
+                "Please select VIVIDSTASIS.exe."
+                )
+            return
+
+        new_version = {
+            "id": version_id,
+            "title": title,
+            "version": version,
+            "executable": executable
+            }
+        data["versions"].append(new_version)
+        with open("verlist.json", "w") as file:
+            json.dump(data, file, indent=4)
+
+        item_id = verlist.insert(
+            "",
+            tk.END,
+            text=title,
+            values=(version,)
+        )
+
+        version_entries[item_id] = new_version
+
+        add_window.destroy()
+
+    add_button = tk.Button(
+        add_window,
+        text="Add Version",
+        command=save_version
+    )
+    add_button.pack()
 
 def game_is_running():
     result = subprocess.run(
@@ -267,5 +385,13 @@ backup_button = tk.Button(
 )
 
 backup_button.pack()
+
+add_version_button = tk.Button(
+    root,
+    text="Add Version",
+    command=add_version
+)
+
+add_version_button.pack()
 
 root.mainloop()
