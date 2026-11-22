@@ -19,6 +19,7 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
 - A valid vivid/stasis installation
 
 *Note: Only tested on Windows 11 Pro. Issues may occur on other versions.
+
 **Note: Only tested on Python 3.14. Issues may occur on other versions.
 
 ## Getting started
