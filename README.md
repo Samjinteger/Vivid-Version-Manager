@@ -58,4 +58,5 @@ Use at your own risk. Always keep backups of your save data. I am not responsibl
 
 ## License
 
-License not yet selected.
+This project is licensed under the MIT License.
+See the (LICENSE) file for details.
