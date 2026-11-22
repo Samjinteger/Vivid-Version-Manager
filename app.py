@@ -26,13 +26,19 @@ frame.pack(side="left", fill="both", expand=True)
 
 frame3.pack(side="right", fill="both", expand=True)
 
+frame.config(width=450)
+frame3.config(width=550)
+
+frame.pack_propagate(False)
+frame3.pack_propagate(False)
+
 version_title = tk.Label(frame3, text="No version selected", font=("Arial", 16))
 version_title.pack(anchor="nw", padx=20, pady=20)
 
 version_number = tk.Label(frame3, text="")
 version_number.pack(anchor="nw", padx=20)
 
-version_path = tk.Label(frame3, text="")
+version_path = tk.Label(frame3, text="", justify="left", anchor="w")
 version_path.pack(anchor="nw", padx=20)
 
 label = tk.Label(frame, text="Installed Versions")
@@ -91,9 +97,16 @@ def selection():
 
     version_title.config(text=title)
     version_number.config(text=f"Version: {version}")
-    version_path.config(text=f"Location: {version_entries[selected_item]['executable']}")
-
+    version_path.config(
+        text=f"Location: {version_entries[selected_item]['executable']}"
+        )
+    version_id_label.config(
+        text=f"Save Profile ID: {version_entries[selected_item]['id']}"
+        )
     print(f"Selected; {title} ({version})")
+
+version_id_label = tk.Label(frame3, text="")
+version_id_label.pack(anchor="nw", padx=20)
 
 def add_version():
     add_window = tk.Toplevel(root)
@@ -215,7 +228,7 @@ def add_version():
 
 with open("verlist.json") as f:
     contents = f.read()
-    versioncount = contents.count("title")
+    versioncount = len(data["versions"])
 
 def game_is_running():
     result = subprocess.run(
