@@ -1,0 +1,22 @@
+{
+    "versions": [
+        {
+            "id": "steam-latest",
+            "title": "Latest Steam Version",
+            "version": "6.2.2.2",
+            "executable": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\vividstasis\\VIVIDSTASIS.exe"
+        },
+        {
+            "id": "early-ch2",
+            "title": "Early Chapter 2",
+            "version": "2.8265.999",
+            "executable": "C:\\Users\\samjinteger\\Documents\\vividversions\\vividstasis 2.8265.999\\24423071\\VIVIDSTASIS.exe"
+        },
+        {
+            "id": "vivid-3.3.1",
+            "title": "Version 3.3.1",
+            "version": "3.3.1",
+            "executable": "C:\\Users\\samjinteger\\Documents\\vividversions\\vividstasis 3.3.1\\24423071\\VIVIDSTASIS.exe"
+        }
+    ]
+}

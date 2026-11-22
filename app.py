@@ -1,4 +1,12 @@
 import tkinter as tk
+from tkinter import ttk
+import subprocess
+import os
+import json
+import shutil
+from pathlib import Path
+from datetime import datetime 
+import uuid
 
 root = tk.Tk()
 
@@ -9,12 +17,255 @@ root.maxsize(750, 750)
 label = tk.Label(root, text="Installed Versions")
 label.pack()
 
-listbox = tk.Listbox(root)
-listbox.insert(1, "2.8265.999")
-listbox.insert(2, "aaaa")
-listbox.pack()
+verlist = ttk.Treeview(root, columns=("version",), show="tree headings")
 
-launchbutton = tk.Button(root, text="Launch")
-launchbutton.pack()
+verlist.heading("#0", text="Title")
+verlist.heading("version", text="Version")
+
+with open("verlist.json", "r") as file:
+    data = json.load(file)
+
+with open("data/settings.json", "r") as file:
+    settings = json.load(file)
+
+active_version_id = settings["active_version_id"]
+
+print(f"Active save profile: {active_version_id}")
+print(10*"-")
+
+print(data)
+print(10*"-")
+
+version_entries = {}
+
+for version in data["versions"]:
+    item_id = verlist.insert(
+        "",
+        tk.END,
+        text=version["title"],
+        values=(version["version"],)
+    )
+
+    version_entries[item_id] = version
+
+verlist.bind("<<TreeviewSelect>>", lambda event: selection())
+
+verlist.pack()
+
+
+def selection():
+    selected_items = verlist.selection()
+
+    if not selected_items:
+        print("No version selected.")
+        return
+
+    selected_item = selected_items[0]
+
+    title = verlist.item(selected_item, "text")
+    version = verlist.item(selected_item, "values")[0]
+
+    print(f"Selected; {title} ({version})")
+
+def game_is_running():
+    result = subprocess.run(
+        ["tasklist", "/FI", "IMAGENAME eq VIVIDSTASIS.exe", "/FO", "CSV", "/NH"],
+        capture_output=True,
+        text=True
+    )
+
+    return "VIVIDSTASIS.exe" in result.stdout
+
+def backup_active_save():
+    if game_is_running():
+        print("Cannot back up saves while vivid/stasis is running!")
+        return False
+
+    save_directory = Path(os.environ["LOCALAPPDATA"]) / "VIVIDSTASIS"
+
+    backup_directory = Path("data") / "backups"
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+
+    backup_path = backup_directory / f"active-save-{timestamp}"
+
+    if not save_directory.is_dir():
+        print("Save directory does not exist!")
+        return False
+
+    try:
+        backup_directory.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(save_directory, backup_path)
+    except OSError as error:
+        print(f"Could not create save backup: {error}")
+        return False
+
+    profile_directory = Path("data") / "saves" / active_version_id
+
+    profile_staging = profile_directory.parent / f"{active_version_id}-staging-{uuid.uuid4().hex}"
+    profile_rollback = profile_directory.parent / f"{active_version_id}-rollback-{uuid.uuid4().hex}"
+
+    try:
+        profile_directory.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(save_directory, profile_staging)
+
+        if profile_directory.exists():
+            profile_directory.rename(profile_rollback)
+
+        try:
+            profile_staging.rename(profile_directory)
+        except Exception:
+            if profile_rollback.exists():
+                profile_rollback.rename(profile_directory)
+            raise
+
+        if profile_rollback.exists():
+            try:
+                shutil.rmtree(profile_rollback)
+            except OSError as error:
+                print(f"Warning: Could not remove old profile: {error}")
+
+    except Exception as error:
+        print(f"Profile backup failed: {error}")
+        return False
+
+    finally:
+        if profile_staging.exists():
+            try:
+                shutil.rmtree(profile_staging)
+            except Exception as error:
+                print(f"Warning: Could not remove staging directory: {error}") 
+
+    print(f"Version profile updated: {active_version_id}")
+
+    print(f"Save backup created: {backup_path}")
+
+    return True
+
+def save_settings():
+    settings["active_version_id"] = active_version_id
+
+    with open("data/settings.json", "w") as file:
+        json.dump(settings, file, indent=4)
+
+def restore_save_profile(version_id):
+    global active_version_id
+
+    if game_is_running():
+        print("Cannot restore saves while vivid/stasis is running!")
+        return False
+
+    profile_directory = Path("data") / "saves" / version_id
+    save_directory = Path(os.environ["LOCALAPPDATA"]) / "VIVIDSTASIS"
+
+    if not profile_directory.is_dir():
+        print(f"No save profile exists for {version_id}. Creating a new one...")
+        profile_directory.mkdir(parents=True, exist_ok=True)
+
+    if not save_directory.is_dir():
+        print("Active save directory does not exist!")
+        return False
+
+    staging_directory = save_directory.parent / f"VIVIDSTASIS-staging-{uuid.uuid4().hex}"
+    rollback_directory = save_directory.parent / f"VIVIDSTASIS-rollback-{uuid.uuid4().hex}"
+
+    try:
+        shutil.copytree(profile_directory, staging_directory)
+        print(f"Profile staged: {version_id}")
+
+        save_directory.rename(rollback_directory)
+
+        try:
+            staging_directory.rename(save_directory)
+        except Exception:
+            rollback_directory.rename(save_directory)
+            raise
+
+        previous_version_id = active_version_id
+        active_version_id = version_id
+
+        try:
+            save_settings()
+        except Exception:
+            active_version_id = previous_version_id
+
+            save_directory.rename(staging_directory)
+            rollback_directory.rename(save_directory)
+
+            raise
+
+        try:
+            shutil.rmtree(rollback_directory)
+        except OSError as error:
+            print(f"Warning: Could not remove rollback directory: {error}")
+
+        print(f"Restored save profile: {version_id}")
+
+        return True
+
+    except Exception as error:
+        print(f"Save restoration failed: {error}")
+        return False
+
+    finally:
+        if staging_directory.exists():
+            try:
+                shutil.rmtree(staging_directory)
+            except Exception as error:
+                print(f"Warning: Could not remove staging directory: {error}")
+
+def launch():
+    if game_is_running():
+        print("Vivid/stasis is already running! Close it first.")
+        return
+    
+    selected_items = verlist.selection()
+
+    if not selected_items:
+        print("Please select a version first.")
+        return
+
+    selected_item = selected_items[0]
+
+    version = version_entries[selected_item]
+
+    executable = version["executable"]
+    version_id = version["id"]
+
+    if not os.path.isfile(executable):
+        print("Executable not found!")
+        return
+
+    if version_id != active_version_id:
+        if not backup_active_save():
+            print("Could not back up the active save. Launch cancelled.")
+            return
+        if not restore_save_profile(version_id):
+            print("Could not restore the selected save profile. Launch Cancelled.")
+            return
+
+    print(f"Launching {version['title']}")
+    print(f"Save profile: {version_id}")
+
+    game_directory = os.path.dirname(executable)
+
+    subprocess.Popen([executable], cwd=game_directory)
+
+
+launch_button = tk.Button(
+    root, 
+    text="Launch", 
+    command=launch
+    )
+
+launch_button.pack()
+
+backup_button = tk.Button(
+    root,
+    text="Backup Active Save",
+    command=backup_active_save
+)
+
+backup_button.pack()
 
 root.mainloop()
