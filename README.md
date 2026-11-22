@@ -22,17 +22,32 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
 
 **Note: Only tested on Python 3.14. Issues may occur on other versions.
 
+## Dependencies
+
+VVM uses the following external Python packages:
+
+Pillow – Image processing and icon display.
+
+icoextract – Extracting icons from Windows executables.
+
 ## Getting started
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/VividVersionManager.git
+   git clone https://github.com/Samjinteger/VividVersionManager.git
    ```
 2. Navigate into the project directory:
    ```bash
    cd VividVersionManager
    ```
-3. Run the application:
+3. Create and activate your .venv (not needed but recommended):
+   ```bash
+   py -3.14 -m venv .venv
+   .venv/Scripts/activate
+4. Install depedencies:
+   ```bash
+   python -m pip install Pillow icoextract
+5. Run the application:
    ```bash
    python main.py
    ```
@@ -41,6 +56,11 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
 
 - Steam Cloud needs to be set OFF for vivid/stasis for the app to work correctly.
 - The 'Add version' window opens behind other windows if not opened through the 'Add version' button in the main window.
+- The data/ folder is excluded from the source code, since it contains local settings, save profiles and backups, which are user data.
+
+## To-do list
+
+to-do
 
 ## Project status
 

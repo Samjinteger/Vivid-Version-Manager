@@ -7,6 +7,9 @@ import shutil
 from pathlib import Path
 from datetime import datetime 
 import uuid
+from io import BytesIO
+from PIL import Image, ImageTk
+from icoextract import IconExtractor
 
 root = tk.Tk()
 
@@ -32,14 +35,20 @@ frame3.config(width=550)
 frame.pack_propagate(False)
 frame3.pack_propagate(False)
 
-version_title = tk.Label(frame3, text="No version selected", font=("Arial", 16))
-version_title.pack(anchor="nw", padx=20, pady=20)
+header_frame = tk.Frame(frame3)
+header_frame.pack(fill="x", padx=20, pady=20)
+
+version_title = tk.Label(header_frame, text="No version selected", font=("Arial", 16))
+version_title.pack(side="left")
+
+icon_label = tk.Label(header_frame)
+icon_label.pack(side="right")
+
+version_path = tk.Label(frame3, text="", justify="left", anchor="w", wraplength=350)
+version_path.pack(anchor="nw", padx=20)
 
 version_number = tk.Label(frame3, text="")
 version_number.pack(anchor="nw", padx=20)
-
-version_path = tk.Label(frame3, text="", justify="left", anchor="w")
-version_path.pack(anchor="nw", padx=20)
 
 label = tk.Label(frame, text="Installed Versions")
 label.pack(fill="x")
@@ -82,6 +91,27 @@ verlist.bind("<<TreeviewSelect>>", lambda event: selection())
 
 verlist.pack(fill="both", expand=True)
 
+def show_executable_icon(executable):
+    try:
+        print(f"Extracting icon from: {executable}")
+
+        extractor = IconExtractor(executable)
+        icon_data = extractor.get_icon(num=0)
+
+        print(f"Icon data received: {len(icon_data.getvalue())} bytes")
+
+        image = Image.open(icon_data).convert("RGBA")  
+        image.thumbnail((64, 64))
+
+        photo = ImageTk.PhotoImage(image)
+
+        icon_label.config(image=photo)
+        icon_label.image = photo
+
+        print("Icon displayed successfully!")
+
+    except Exception as e:
+        print(f"Icon error: {e}")
 
 def selection():
     selected_items = verlist.selection()
@@ -103,6 +133,8 @@ def selection():
     version_id_label.config(
         text=f"Save Profile ID: {version_entries[selected_item]['id']}"
         )
+    show_executable_icon(version_entries[selected_item]["executable"])
+
     print(f"Selected; {title} ({version})")
 
 version_id_label = tk.Label(frame3, text="")
@@ -226,9 +258,7 @@ def add_version():
     )
     add_button.pack()
 
-with open("verlist.json") as f:
-    contents = f.read()
-    versioncount = len(data["versions"])
+versioncount = len(data["versions"])
 
 def game_is_running():
     result = subprocess.run(
