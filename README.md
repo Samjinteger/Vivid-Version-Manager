@@ -1,6 +1,6 @@
 # Vivid Version Manager (VVM)
 
-A small version manager for **vivid/stasis**, built with Python and Tkinter.
+A small version manager for **vivid/stasis** (a rhythm game with a visual novel and ARG elements), built with Python and Tkinter.
 
 VVM lets you manage multiple installations of vivid/stasis, launch different game versions, and keep their save data separate.
 
