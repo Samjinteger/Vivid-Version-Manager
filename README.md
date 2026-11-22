@@ -1,6 +1,6 @@
 # Vivid Version Manager (VVM)
 
-A lightweight version manager for **vivid/stasis**, built with Python and Tkinter.
+A small version manager for **vivid/stasis**, built with Python and Tkinter.
 
 VVM lets you manage multiple installations of vivid/stasis, launch different game versions, and keep their save data separate.
 
@@ -14,9 +14,12 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
 
 ## Requirements
 
-- Windows
-- Python 3.14 or later
+- Windows*
+- Python 3.14 or later*
 - A valid vivid/stasis installation
+
+*Note: Only tested on Windows 11 Pro. Issues may occur on other versions.
+**Note: Only tested on Python 3.14. Issues may occur on other versions.
 
 ## Getting started
 
@@ -33,9 +36,16 @@ VVM lets you manage multiple installations of vivid/stasis, launch different gam
    python main.py
    ```
 
+## Known issues
+
+- Steam Cloud needs to be set OFF for vivid/stasis for the app to work correctly.
+- The 'Add version' window opens behind other windows if not opened through the 'Add version' button in the main window.
+
 ## Project status
 
 VVM is currently a work in progress. Features and the interface are still being developed, and breaking changes may occur.
+
+VVM is a hobby project. No kind of profit is being made out of this, and I am not seeking any monetary value either.
 
 ## Disclaimer
 
